@@ -48,11 +48,19 @@ class LeashLayer(nn.Module):
         This enables transparent access to wrapped layer attributes like
         'attention_type' which are required by newer transformers versions (>= 4.5x).
 
-        Note: __getattr__ is only called when normal attribute lookup fails,
-        so this won't interfere with LeashLayer's own attributes.
+        Note: __getattr__ is only called when normal attribute lookup fails.
+        We first delegate to nn.Module.__getattr__ for _parameters, _buffers, _modules,
+        then proxy remaining lookups to the wrapped layer.
         """
+        # First, let nn.Module handle its own attributes (_parameters, _buffers, _modules)
+        # This ensures self.layer works correctly
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            pass
+
+        # Then proxy to the wrapped layer for attributes like 'attention_type'
         # Access _modules dict directly to avoid recursion
-        # _modules is populated by nn.Module.__init__ and self.layer assignment
         if '_modules' in self.__dict__ and 'layer' in self._modules:
             return getattr(self._modules['layer'], name)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
