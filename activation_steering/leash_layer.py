@@ -41,6 +41,22 @@ class LeashLayer(nn.Module):
         self.is_multi_steering = False
         #self.reset_instance()
 
+    def __getattr__(self, name: str):
+        """
+        Proxy attribute access to the wrapped layer.
+
+        This enables transparent access to wrapped layer attributes like
+        'attention_type' which are required by newer transformers versions (>= 4.5x).
+
+        Note: __getattr__ is only called when normal attribute lookup fails,
+        so this won't interfere with LeashLayer's own attributes.
+        """
+        # Access _modules dict directly to avoid recursion
+        # _modules is populated by nn.Module.__init__ and self.layer assignment
+        if '_modules' in self.__dict__ and 'layer' in self._modules:
+            return getattr(self._modules['layer'], name)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
     def steer(self, behavior_vector: torch.Tensor, condition_projector: torch.Tensor, threshold: float = 0.0, use_ooi_preventive_normalization: bool = True, apply_behavior_on_first_call: bool = True, condition_comparator_threshold_is: str = "larger", condition_threshold_comparison_mode: str = "mean", **kwargs) -> None:
         """
         Configure steering for this layer.
