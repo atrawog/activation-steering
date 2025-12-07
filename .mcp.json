@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "direnv",
+      "args": [
+        "exec", ".",
+        "github-mcp-server",
+        "stdio",
+        "--tools",
+        "get_me,list_workflows,list_workflow_runs,get_workflow_run,get_job_logs,list_workflow_jobs,get_file_contents,list_commits,get_commit,list_branches,issue_read,issue_write,add_issue_comment,list_issues,search_issues,list_issue_types,sub_issue_write,get_label,list_label,label_write,pull_request_read,list_pull_requests,search_pull_requests"
+      ]
+    },
+    "jupyter": {
+      "type": "http",
+      "url": "http://127.0.0.1:8888/mcp"
+    }
+  }
+}
